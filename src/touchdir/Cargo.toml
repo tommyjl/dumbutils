@@ -1,0 +1,18 @@
+[package]
+name = "touchdir"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "The touchdir utility creates files with the name of the specified directory and the specified file extensions."
+
+authors = ["Tommy Joe Lund"]
+homepage = "https://github.com/uutils/coreutils"
+repository = "https://github.com/tommyjl/dumbutils/tree/main/src/touchdir"
+keywords = ["cli", "utility"]
+categories = ["command-line-utilities"]
+
+[lib]
+path = "src/touchdir.rs"
+
+[dependencies]
+clap = { version = "3.1.18", features = ["derive"] }
