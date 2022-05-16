@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::path::PathBuf;
+
 #[derive(Debug)]
 pub enum TouchdirError {
     Io(std::io::Error),
@@ -42,14 +45,14 @@ impl TouchdirMode {
 
 pub struct Touchdir {
     mode: TouchdirMode,
-    filenames: Vec<String>,
+    filepaths: Vec<PathBuf>,
 }
 
 impl Touchdir {
     pub fn new(mode: TouchdirMode) -> Self {
         Self {
             mode,
-            filenames: Vec::new(),
+            filepaths: Vec::new(),
         }
     }
 
@@ -58,17 +61,19 @@ impl Touchdir {
         directory: String,
         extensions: Vec<String>,
     ) -> Result<Self, TouchdirError> {
-        let current_dir = std::env::current_dir()?;
-
         let resolved_directory = match directory.as_str() {
-            "." => current_dir.file_name().unwrap().to_string_lossy(),
-            _ => todo!("Can only use current directory at the moment"),
+            "." | "" => std::env::current_dir()?,
+            _ => PathBuf::from(directory),
         };
 
+        let dirname = resolved_directory.file_name().unwrap().to_string_lossy();
+
         for extension in extensions.iter() {
-            let resolved_filename = format!("{}.{}", resolved_directory, extension);
-            self.filenames.contains(&resolved_filename);
-            self.filenames.push(resolved_filename);
+            let filename = resolved_directory.join(&format!("{}.{}", dirname, extension));
+
+            if !self.filepaths.contains(&filename) {
+                self.filepaths.push(filename);
+            }
         }
 
         Ok(self)
@@ -82,15 +87,15 @@ impl Touchdir {
     }
 
     fn touch(&self) -> Result<(), TouchdirError> {
-        for filename in self.filenames.iter() {
-            std::fs::File::create(&filename)?;
+        for filename in self.filepaths.iter() {
+            File::create(&filename)?;
         }
         Ok(())
     }
 
     fn dryrun(&self) -> Result<(), TouchdirError> {
-        for filename in self.filenames.iter() {
-            println!("{}", filename);
+        for filename in self.filepaths.iter() {
+            println!("{}", filename.to_str().unwrap());
         }
         Ok(())
     }

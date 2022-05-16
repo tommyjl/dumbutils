@@ -5,6 +5,7 @@ use touchdir::*;
 #[clap(version, about, long_about = None)]
 struct Args {
     /// List of file extensions
+    // TODO: Minimum length of 1
     extensions: Vec<String>,
 
     /// Directory used for creating files
